@@ -191,7 +191,7 @@ function gen_module(mod_name::Symbol, ros_pkg_roots::Vector{String}, dst_dir::St
     end
 end
 
-# thif function receives a list of (ros_pck_dir, ros_pck_dependencies)
+# rospkg_deps_pairs: list of (ros_pck_dir, ros_pck_dependencies)
 function gen_module(mod_name::Symbol, rospkg_deps_pairs::Vector, dst_dir::String)
     statements = Expr[]
     for (src_dir, deps) in rospkg_deps_pairs
