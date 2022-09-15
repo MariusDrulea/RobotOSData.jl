@@ -190,3 +190,20 @@ function gen_module(mod_name::Symbol, ros_pkg_roots::Vector{String}, dst_dir::St
         print(io, mod_code)
     end
 end
+
+# thif function receives a list of (ros_pck_dir, ros_pck_dependencies)
+function gen_module(mod_name::Symbol, rospkg_deps_pairs::Vector, dst_dir::String)
+    statements = Expr[]
+    for (src_dir, deps) in rospkg_deps_pairs
+        filename, pkg_name = gen_package_file(src_dir, dst_dir, deps...)
+        push!(statements, :(include($filename)))
+        push!(statements, :(export $pkg_name))        
+    end
+
+    mod_code = Expr(:module, true, mod_name, Expr(:block, statements...))
+
+    mod_path = joinpath(dst_dir, "$mod_name.jl")    
+    open(mod_path, "w") do io
+        print(io, mod_code)
+    end
+end
