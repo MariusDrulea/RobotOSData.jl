@@ -84,7 +84,8 @@ function make_struct(parent_pkg::Symbol, name::Symbol, lines)
                 if N <= 100 # small size of StaticArrays in Julia 1.8
                     decl = Expr(:curly, :SVector, N, decl)
                 else
-                    # for a larger size we use a dynamically allocated vector, but we retain it's static size in the type itself: VectorN{Type, StaticSize}
+                    # for a larger size we use a dynamically allocated vector, 
+                    # but we statically retain the length declared in the ros message; we use the type NVector{Size, Type} for this
                     decl = Expr(:curly, :NVector, N, decl)
                 end
                 t = next()
