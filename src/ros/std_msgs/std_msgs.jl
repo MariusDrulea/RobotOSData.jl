@@ -1,6 +1,7 @@
 # !! auto-generated code, do not edit !!
 module std_msgs
 using RobotOSData.Messages
+
 struct MultiArrayDimension <: Readable
     label::String
     size::UInt32

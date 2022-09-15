@@ -1,6 +1,7 @@
 
 using Tokenize
 using DataStructures
+using .SizedArrays
 
 const builtin_types = Dict{Symbol,Symbol}(
     :time => :ROSTime,
@@ -78,9 +79,14 @@ function make_struct(parent_pkg::Symbol, name::Symbol, lines)
         
         if t.kind == Tokenize.Tokens.LSQUARE
             t = next()
-            if t.kind == Tokenize.Tokens.INTEGER
-                N = parse(Int,t.val)
-                decl = Expr(:curly, :SVector, N, decl)
+            if t.kind == Tokenize.Tokens.INTEGER                
+                N = parse(Int,t.val)                
+                if N <= 100 # small size of StaticArrays in Julia 1.8
+                    decl = Expr(:curly, :SVector, N, decl)
+                else
+                    # for a larger size we use a dynamically allocated vector, but we retain it's static size in the type itself: VectorN{Type, StaticSize}
+                    decl = Expr(:curly, :NVector, N, decl)
+                end
                 t = next()
             elseif t.kind == Tokenize.Tokens.RSQUARE
                 decl = Expr(:curly, :Vector, decl)
@@ -139,12 +145,11 @@ function gen_package(package::Symbol, msg_dir::String, deps)
         #     end
         # end
     end
-
-    imports = [:(using $m) for m in deps]
+    
     definitions = [expr for (_, expr) in decls]
     code = Expr(:block,
         :(using RobotOSData.Messages),
-        imports...,
+        deps...,
         definitions...)
     Expr(:module, true, package, code)
 end

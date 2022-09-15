@@ -3,7 +3,7 @@ module Messages
 
 using StaticArrays: SVector
 using FastIOBuffers: FastReadBuffer
-
+using ..SizedArrays
 
 """
 Marks compound types that can be deserialised from a ROS datastream.
@@ -50,6 +50,13 @@ function read_field(io::IO, ::Type{<:SVector{N,E}}) where {N,E}
     arr = Vector{E}(undef, N)
     read_array!(io, arr)
     SVector{N,E}(arr)
+end
+
+""" Reads a fixed-length array. """
+function read_field(io::IO, ::Type{<:NVector{N,E}}) where {N,E}
+    arr = NVector{N, E}()
+    read_array!(io, arr.data)
+    arr
 end
 
 read_field(arr::Vector{UInt8}, ::Type{T}) where {T} = read_field(FastReadBuffer(arr), T)

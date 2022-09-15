@@ -9,6 +9,8 @@ function __init__()
     add_loader(format"ROSBAG", :RobotOSData)
 end
 
+include("sized_arrays.jl")
+
 include("messages.jl")
 using .Messages
 include("ros/std_msgs/StdMsgs.jl")
@@ -18,7 +20,7 @@ include("records.jl")
 include("bag.jl")
 include("gen_msgs.jl")
 
-export ROSTime, ROSDuration, MessageData
+export ROSTime, ROSDuration, MessageData, SizedArrays
 
 
 end # module

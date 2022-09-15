@@ -129,9 +129,12 @@ end
 
 """ Calls f(rec) for each record in chunk i. """
 function replay(f, bag::ChunkedBag, i::Integer, filters=())
-    open(bag.file) do s
-        replay(f, bag, s.io, i, filters)
-    end
+    # open(bag.file) do s
+    #     replay(f, bag, s.io, i, filters)
+    # end
+    s = open(bag.file)
+    replay(f, bag, s.io, i, filters)
+    close(s)
 end
 
 """ Calls f(rec) for each record in the specified chunks. """
@@ -192,12 +195,20 @@ end
 function read_messages(bag::ChunkedBag, chunk_indices, args...)
     messages = Dict{Int,Vector}()
     filters = make_filter.(Ref(bag), args)
-    replay(bag, chunk_indices, filters) do msg
+    # replay(bag, chunk_indices, filters) do msg
+    #     out = get!(messages, msg.conn) do
+    #         Vector{typeof(msg)}()
+    #     end
+    #     push!(out, msg)
+    # end
+    function f(msg)
         out = get!(messages, msg.conn) do
             Vector{typeof(msg)}()
         end
         push!(out, msg)
     end
+    replay(f, bag, chunk_indices, filters)
+    
     for f in filters
         if isa(f, ConnectionFilter)
             return messages[f.conn]
